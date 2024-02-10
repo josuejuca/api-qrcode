@@ -7,8 +7,12 @@ from starlette.responses import StreamingResponse
 app = FastAPI()
 
 @app.get('/')
+def index():
+    return {"API": "Online"}
+
+@app.get('/qrcode')
 def home():
-    return {"API": "JUCA Soft"}
+    return {"JUCA Soft": "QR Code API"}
 
 @app.get("/qrcode/{texto}")
 def QrAPI(texto: str, size: int = Query(default=200, description="Tamanho do QR Code")):
