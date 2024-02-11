@@ -1,8 +1,10 @@
-import io
-import qrcode
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi import FastAPI, Query
-from starlette.responses import StreamingResponse
+from typing import Union
+from fastapi import FastAPI, Query, Request
+from fastapi.responses import HTMLResponse, StreamingResponse
+from fastapi.staticfiles import StaticFiles
+from fastapi.templating import Jinja2Templates
+
 
 app = FastAPI()
 
