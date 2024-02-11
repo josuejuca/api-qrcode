@@ -1,3 +1,5 @@
+import io
+import qrcode
 from fastapi.middleware.cors import CORSMiddleware
 from typing import Union
 from fastapi import FastAPI, Query, Request
