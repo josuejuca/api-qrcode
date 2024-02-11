@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="API para gerar QR Code com configurações de tamanho. Retorna imagem png." />
+    <title>API Gerador de QR Code | JUCA Soft</title>
+
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700">  
+    <link rel="stylesheet" href="https://qrcode.jucasoft.com.br/static/main.css"> <!-- CSS -->
+    <link rel="shortcut icon" href="https://www.jucasoft.com.br/assets/img/juca-soft-fv.png">
+
+    <script src="https://qrcode.jucasoft.com.br/static/main.js" defer></script> <!-- JS -->
+
+</head>
+
+<body class="bg-white">
+    <div class="font-sans text-gray-900 antialiased">
+
+        <nav x-data="{ open: false }" class="bg-white border-b border-gray-200">
+            <!-- Primary Navigation Menu -->
+            <div class="container mx-auto px-4 md:px-6">
+                <div class="flex justify-between h-16 items-center">
+                    <!-- Logo -->
+                    <div class="flex-shrink-0 flex items-center ">
+                        <a href="/" style="display: flex; align-items: center; font-weight: bold; font-size: 24px;">
+                            <img src="https://www.jucasoft.com.br/assets/img/juca-soft.png" alt="Logo"
+                                style="width:150px;">
+                            <span style="color: #000; font-weight: bold; font-size: 24px; margin: 15px;"> | </span> API
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </nav>
+
+        <div class="container mx-auto p-4 md:px-6">
+            <header>
+                <div class="mt-4">
+                    <h1 class="text-xl font-bold mb-1 text-red">API Gerador de QR Code</h1>
+                    <p>Gera QR Codes com configurações de tamanho.</p>
+                </div>
+            </header>
+
+            <div class="mt-5" x-data="tool()" x-init="init()">
+
+                <div class="flex items-center bg-white border p-2 overflow-x-auto">
+                    <div class="bg-blue-400 text-white font-bold px-2 py-1 mr-2 rounded text-sm">GET</div>
+                    <div class="mr-2">https://qrcode.jucasoft.com.br/data</div>
+                    <div class="text-gray-500 flex-shrink-0">Retorna imagem png com o QR Code.</div>
+                </div>
+
+                <form @submit.prevent="execute()">
+
+                    <div class="bg-white border p-4 parameters" style="margin-top:-1px">
+                        <h2 class="mb-2 text-xs text-gray-600">PARÂMETROS</h2>
+                        <div class="overflow-x-auto -m-2">
+                            <table>
+                                <thead>
+                                    <tr class="text-sm">
+                                        <th>Nome</th>
+                                        <th>Valor</th>
+                                        <th>Tipo</th>
+                                        <th>Descrição</th>
+                                    </tr>
+                                </thead>
+                                <tbody class="whitespace-nowrap">
+                                    <tr>
+                                        <td>texto *</td>
+                                        <td><input
+                                                class="rounded-md shadow-sm border-gray-300 focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50"
+                                                type="text" x-model="form.text">
+                                        </td>
+                                        <td>string</td>
+                                        <td class="text-sm text-gray-500">Texto que será armazenado no QR Code.</td>
+                                    </tr>
+
+                                    <tr>
+                                        <td>size</td>
+                                        <td><input
+                                                class="rounded-md shadow-sm border-gray-300 focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50 w-full"
+                                                type="number" min="1" max="900" x-model="form.size">
+                                        </td>
+                                        <td>integer</td>
+                                        <td class="text-sm text-gray-500">Tamanho do QR Code. (Por padrão é 200)</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                        <div class="mt-6">
+                            <button type="submit"
+                                class="bg-yellow-400 hover:bg-yellow-500 text-white text-sm inline-flex items-center px-4 py-2 border border-transparent rounded-md font-bold tracking-widest focus:outline-none disabled:opacity-50 transition ease-in-out duration-150 relative z-10 mr-1"
+                                x-bind:disabled="loading">
+                                Executar
+                            </button>
+                            <button type="button"
+                                class="bg-gray-100 hover:bg-gray-200 border-gray-200 text-gray-700 text-sm inline-flex items-center px-4 py-2 border border-transparent rounded-md font-bold tracking-widest focus:outline-none disabled:opacity-50 transition ease-in-out duration-150 relative z-10"
+                                @click="clean()">
+                                Limpar
+                            </button>
+                        </div>
+
+                        <template x-if="showResponse">
+                            <div>
+                                <p class="mt-6 mb-1 text-xs text-gray-600">REQUISIÇÃO</p>
+                                <div class="text-sm border p-2 bg-white overflow-auto">
+                                    <code x-text="requestUrl"></code>
+                                </div>
+
+                                <p class="mt-5 mb-1 text-xs text-gray-600">RESPOSTA</p>
+                                <div class="border p-2 text-sm bg-white overflow-auto">
+
+                                    <div>
+                                        Status: <span class="mr-2"
+                                            :class="resp.status<300 ? 'text-green-600' : 'text-red-600'"
+                                            x-text="resp.status"></span>
+                                        Content-Type: <span class="text-gray-600 mr-2" x-text="resp.contentType"></span>
+                                    </div>
+
+                                    <div class="mt-2">
+                                        <div x-html="resp.body" class="max-h-96"></div>
+                                    </div>
+
+                                </div>
+                            </div>
+                        </template>
+                    </div>
+                </form>
+            </div>
+
+            <script src="https://qrcode.jucasoft.com.br/static/shpretty.js"></script>
+
+            <script>
+                function tool() {
+                    return {
+                        form: {
+                            text: '',
+                            size: '',
+                        },
+                        resp: {
+                            status: '200',
+                            contentType: 'image/png',
+                            body: '<img src="https://qrcode.jucasoft.com.br/data?text=teste" alt="API QR Code">',
+                        },
+                        requestUrl: 'https://qrcode.jucasoft.com.br/data?text=teste',
+                        loading: false,
+                        showResponse: true,
+                        apiName: 'qrcode',
+
+                        init() {
+                            if (localStorage.getItem(this.apiName)) {
+                                this.form = JSON.parse(localStorage.getItem(this.apiName))
+                            }
+                        },
+
+                        execute() {
+                            this.loading = true
+                            localStorage.setItem(this.apiName, JSON.stringify(this.form));
+
+                            let obj = {};
+                            for (const key in this.form) {
+                                if (this.form[key] != null && this.form[key] != '') {
+                                    obj[key] = this.form[key]
+                                }
+                            }
+
+                            const querystring = new URLSearchParams(obj).toString()
+                            const requestRoute = 'https://qrcode.jucasoft.com.br/data?' + querystring
+                            this.requestUrl = "" + requestRoute
+
+                            axios.get(requestRoute)
+                                .then(response => {
+
+                                    this.resp.status = response.status
+                                    this.resp.contentType = response.headers['content-type']
+
+                                    if (this.resp.contentType == 'image/png') {
+                                        this.resp.body = '<img src="' + this.requestUrl + '">'
+                                    }
+
+
+                                }).catch(e => {
+                                    this.resp.status = e.response.status
+                                    this.resp.contentType = e.response.headers['content-type']
+
+                                    if (this.resp.contentType == 'application/json') {
+                                        const json = jsonDisplay.outputPretty(JSON.stringify(e.response.data))
+                                        this.resp.body = '<pre>' + json + '</pre>'
+                                    }
+
+                                    if (this.resp.contentType == 'image/png') {
+                                        this.resp.body = '<img src="' + this.requestUrl + '">'
+                                    }
+
+                                }).finally(() => {
+                                    this.loading = false
+                                    this.showResponse = true
+                                })
+
+                        },
+
+                        clean() {
+                            localStorage.removeItem(this.apiName)
+                            location.reload()
+                        }
+                    }
+                }
+            </script>
+        </div>
+
+        <footer>
+            <div class="container mx-auto p-4 md:px-6 text-sm mt-20 flex flex-col md:flex-row items-center justify-between text-gray-600">
+                <div class="mb-2 md:mb-0">
+                    © 2024 JUCA Soft
+                </div>
+                <div>
+                    <a href="https://josuejuca.com/"><img src="https://assets-juca.netlify.app/img/juca/juca-black.png" alt="Logo" style="max-width: 130px;" id="logo-wd-F"></a>
+                </div>
+            </div>
+        </footer>
+    </div>
+</body>
+
+</html>
