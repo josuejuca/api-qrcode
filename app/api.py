@@ -21,16 +21,17 @@ app.add_middleware(
 app.mount("/static", StaticFiles(directory="static"), name="static")
 templates = Jinja2Templates(directory="templates")
 
+# Rota Index 
+@app.get("/", response_class=HTMLResponse)
+def index(request: Request):
+    return templates.TemplateResponse("api-qrcode.jinja", {"request": request})
 
-@app.get('/')
-def index():
-    return {"API": "Online"}
-
-
+# Rota QR Code 
 @app.get('/qrcode')
 def home():
     return {"JUCA Soft": "QR Code API"}
 
+# Rota API v1 
 @app.get("/qrcode/{texto}")
 def QrAPI(texto: str, size: int = Query(default=200, description="Tamanho do QR Code")):
     qr = qrcode.QRCode(
