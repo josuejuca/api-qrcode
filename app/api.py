@@ -1,10 +1,19 @@
 import io
 import qrcode
-
+from fastapi.middleware.cors import CORSMiddleware
 from fastapi import FastAPI, Query
 from starlette.responses import StreamingResponse
 
 app = FastAPI()
+
+# Configuração do CORS para permitir solicitações de todos os domínios
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],  # Isso permite solicitações de todos os domínios
+    allow_credentials=True,
+    allow_methods=["GET", "POST", "PUT", "DELETE"],  # Permita os métodos que você precisa
+    allow_headers=["*"],  # Isso permite todos os cabeçalhos
+)
 
 @app.get('/')
 def index():
