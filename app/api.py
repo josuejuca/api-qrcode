@@ -17,9 +17,15 @@ app.add_middleware(
     allow_headers=["*"],  # Isso permite todos os cabeçalhos
 )
 
+# Template API Docs
+app.mount("/static", StaticFiles(directory="static"), name="static")
+templates = Jinja2Templates(directory="templates")
+
+
 @app.get('/')
 def index():
     return {"API": "Online"}
+
 
 @app.get('/qrcode')
 def home():
@@ -45,7 +51,7 @@ def QrAPI(texto: str, size: int = Query(default=200, description="Tamanho do QR 
     return StreamingResponse(buf, media_type="image/png")
 
 
-
+# Rota Padrão (text= , size= )
 @app.get("/data")
 def QRAPI(text: str = Query(..., description="Conteúdo do QR Code"), size: int = Query(default=200, description="Tamanho do QR Code")):
     qr = qrcode.QRCode(
